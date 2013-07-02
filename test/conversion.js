@@ -1,48 +1,17 @@
-/*global before, after, describe, it*/
+/*jshint es5: true */
+/*global describe, it*/
 
 var MWS = require("../lib")
 ,   expect = require("expect.js")
 ,   mongoose = require("mongoose")
-,   fakeMongo = require("mongodb-fs")
-,   portfinder = require("portfinder")
 ;
-
-
-// set up objects and mocking
-before(function (done) {
-    portfinder.getPort(function (err, port) {
-        if (err) throw(err);
-        fakeMongo.init({
-            port:   port
-        ,   mocks:  {
-                testdb: {}
-            }
-        });
-        fakeMongo.start(function (err) {
-            if (err) throw(err);
-            mongoose.connect("mongodb://localhost:" + port + "/testdb", {}, function (err) {
-                if (err) throw(err);
-                done();
-            });
-        });
-    });
-});
-
-after(function (done) {
-    mongoose.disconnect(function (err) {
-        if (err) throw(err);
-        fakeMongo.stop(function (err) {
-            if (err) throw(err);
-            done();
-        });
-    });
-});
 
 describe("Converter", function () {
     it("should reject non-object root schema", function () {
         expect(function () { MWS.convert({ type: "string" }); }).to.throwException();
     });
 
+    // exceptional cases
     it("should reject unknown types", function () {
         expect(function () {
                     MWS.convert({
@@ -75,6 +44,59 @@ describe("Converter", function () {
                     });
                 }).to.throwException();
     });
+    
+    
+    // booleans
+    describe("for Booleans", function () {
+        var sch = {
+                type:   "object"
+            ,   properties: {
+                    name:   {
+                        type:   "boolean"
+                    ,   enum:   [false]
+                    }
+                }
+            }
+        ,   BoolEnum = mongoose.model("BoolEnum", MWS.convert(sch))
+        ;
+        delete sch.properties.name.enum;
+        var BoolAny = mongoose.model("BoolAny", MWS.convert(sch))
+        ,   good = {
+                "should accept the correct enum":       new BoolEnum({ name: false })
+            ,   "should accept true for any boolean":   new BoolAny({ name: true })
+            ,   "should accept false for any boolean":  new BoolAny({ name: false })
+            }
+        ,   bad = {
+                "should reject the wrong enum":                 new BoolEnum({ name: true })
+            ,   "should reject non boolean for enum":           new BoolEnum({ name: "lala" })
+            }
+        ;
+        for (var k in good) {
+            if (good.hasOwnProperty(k)) {
+                (function (k, inst) {
+                    it(k, function (done) {
+                        inst.validate(function (err) {
+                            expect(err).to.not.be.ok();
+                            done();
+                        });
+                    });
+                })(k, good[k]);
+            }
+        }
+        for (var k in bad) {
+            if (bad.hasOwnProperty(k)) {
+                (function (k, inst) {
+                    it(k, function (done) {
+                        inst.validate(function (err) {
+                            expect(err).to.be.ok();
+                            done();
+                        });
+                    });
+                })(k, bad[k]);
+            }
+        }
+    });
+
 });
 
 // TEST:
