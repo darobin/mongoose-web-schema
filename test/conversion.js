@@ -53,13 +53,34 @@ describe("Converter", function () {
                     });
                 }).to.throwException();
     });
+
+    it("should not support arrays with positional types yet", function () {
+        expect(function () {
+                    MWS.convert({
+                        type: "object"
+                    ,   properties: {
+                            name:   { type: "array", items: [{ type: "string" }, { type: "number" }] }
+                        }
+                    });
+                }).to.throwException();
+    });
+
+    it("should not support union types yet", function () {
+        expect(function () {
+                    MWS.convert({
+                        type: "object"
+                    ,   properties: {
+                            name:   { type: [{ type: "string" }, { type: "number" }] }
+                        }
+                    });
+                }).to.throwException();
+    });
 });
 
 // TEST:
 //  - any is mixed
 //  - object with properties
 //  - array
-//      . [ws.items] blows
 //      . ws.items is subdocuments
 //  - string, text, html is string
 //      . constraints
@@ -68,6 +89,5 @@ describe("Converter", function () {
 //  - boolean is boolean
 //      . constraints
 //  - null is null
-//  - union blows
 //  - link is objectid
 //  - date, time, datetime-local is date
