@@ -6,4 +6,9 @@
 ,   "dependencies": {
         "mongoose":     "3.5.7"
     }
+,   "devDependencies":  {
+        "mongodb-fs":   "0.0.3"
+    ,   "portfinder":   "0.2.1"
+    ,   "expect.js":    "0.2.0"
+    }
 }
