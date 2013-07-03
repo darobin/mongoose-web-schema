@@ -4,9 +4,9 @@
 ,   "license":  "MIT"
 ,   "main":     "lib/index.js"
 ,   "dependencies": {
-        "mongoose":     "3.5.7"
     }
 ,   "devDependencies":  {
         "expect.js":    "0.2.0"
+    ,   "mongoose":     "3.5.7"
     }
 }
