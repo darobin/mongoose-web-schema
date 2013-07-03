@@ -186,6 +186,38 @@ describe("Converter", function () {
         checkBad(bad);
     });
 
+    // numbers
+    describe("for numbers", function () {
+        var sch = {
+                type:   "object"
+            ,   properties: {
+                    name: { type: "number", minimum: 3, maximum: 5 }
+                }
+            }
+        ,   NumberMinMax = mongoose.model("NumberMinMax", MWS.convert(sch, mongoose))
+        ;
+        sch.properties.name = { type: "number", minimumExclusive: 3, maximumExclusive: 5 };
+        var NumberExclusive = mongoose.model("NumberExclusive", MWS.convert(sch, mongoose));
+        sch.properties.name = { type: "number" };
+        var NumberSimple = mongoose.model("NumberSimple", MWS.convert(sch, mongoose))
+        ,   good = {
+                "should accept minmax 3":       new NumberMinMax({ name: 3 })
+            ,   "should accept minmax 5":       new NumberMinMax({ name: 5 })
+            ,   "should accept mmexcl 4":       new NumberExclusive({ name: 4 })
+            ,   "should accept simple number":  new NumberSimple({ name: 44 })
+            }
+        ,   bad = {
+                "should reject minmax 2":       new NumberMinMax({ name: 2 })
+            ,   "should reject minmax 6":       new NumberMinMax({ name: 6 })
+            ,   "should reject mmexcl 3":       new NumberExclusive({ name: 3 })
+            ,   "should reject mmexcl 5":       new NumberExclusive({ name: 5 })
+            ,   "should reject non number":     new NumberSimple({ name: "aaa" })
+            }
+        ;
+        checkGood(good);
+        checkBad(bad);
+    });
+
 });
 
 // TEST:
@@ -193,7 +225,5 @@ describe("Converter", function () {
 //  - object with properties
 //  - array
 //      . ws.items is subdocuments
-//  - number is number
-//      . constraints
 //  - link is objectid
 //  - date, time, datetime-local is date
