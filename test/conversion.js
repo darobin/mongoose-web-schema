@@ -135,6 +135,48 @@ describe("Converter", function () {
         checkBad(bad);
     });
 
+    // strings
+    describe("for strings", function () {
+        var sch = {
+                type:   "object"
+            ,   properties: {
+                    str: { type: "string", enum: ["a", "b"] }
+                ,   txt: { type: "text", enum: ["a", "b"] }
+                ,   htm: { type: "html", enum: ["a", "b"] }
+                }
+            }
+        ,   StringsEnum = mongoose.model("StringsEnum", MWS.convert(sch, mongoose))
+        ;
+        delete sch.properties.str.enum;
+        delete sch.properties.txt.enum;
+        delete sch.properties.htm.enum;
+        sch.properties.str.pattern = "^a{3,5}$";
+        sch.properties.txt.pattern = "^a{3,5}$";
+        sch.properties.htm.pattern = "^a{3,5}$";
+        var StringsPattern = mongoose.model("StringsPattern", MWS.convert(sch, mongoose));
+        delete sch.properties.str.pattern;
+        delete sch.properties.txt.pattern;
+        delete sch.properties.htm.pattern;
+        var StringsSimple = mongoose.model("StringsSimple", MWS.convert(sch, mongoose))
+        ,   good = {
+                "should accept enum 'a'":       new StringsEnum({ str: "a", txt: "a", htm: "a" })
+            ,   "should accept enum 'b'":       new StringsEnum({ str: "b", txt: "b", htm: "b" })
+            ,   "should accept pattern":        new StringsPattern({ str: "aaa", txt: "aaaa", htm: "aaaaa" })
+            ,   "should accept simple string":  new StringsSimple({ str: "aaa", txt: "aaaa", htm: "aaaaa" })
+            
+            }
+        ,   bad = {
+                "should reject enum 'c'":           new StringsEnum({ str: "c", txt: "c", htm: "c" })
+            ,   "should reject non string in enum": new StringsEnum({ str: 5, txt: 5, htm: 5 })
+            ,   "should reject pattern":            new StringsPattern({ str: "bbb", txt: "a", htm: "c" })
+            ,   "should reject unanchored pattern": new StringsPattern({ str: "baaa", txt: "aaab", htm: "baaab" })
+            ,   "should reject non simple string":  new StringsEnum({ str: 5, txt: 5, htm: 5 })
+            }
+        ;
+        checkGood(good);
+        checkBad(bad);
+    });
+
 });
 
 // TEST:
@@ -146,6 +188,5 @@ describe("Converter", function () {
 //      . constraints
 //  - number is number
 //      . constraints
-//  - null is null
 //  - link is objectid
 //  - date, time, datetime-local is date
