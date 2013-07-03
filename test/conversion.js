@@ -140,36 +140,45 @@ describe("Converter", function () {
         var sch = {
                 type:   "object"
             ,   properties: {
-                    str: { type: "string", enum: ["a", "b"] }
-                ,   txt: { type: "text", enum: ["a", "b"] }
-                ,   htm: { type: "html", enum: ["a", "b"] }
+                    str: { type: "string",  enum: ["a", "b"] }
+                ,   txt: { type: "text",    enum: ["a", "b"] }
+                ,   htm: { type: "html",    enum: ["a", "b"] }
                 }
             }
         ,   StringsEnum = mongoose.model("StringsEnum", MWS.convert(sch, mongoose))
         ;
-        delete sch.properties.str.enum;
-        delete sch.properties.txt.enum;
-        delete sch.properties.htm.enum;
-        sch.properties.str.pattern = "^a{3,5}$";
-        sch.properties.txt.pattern = "^a{3,5}$";
-        sch.properties.htm.pattern = "^a{3,5}$";
+        sch.properties = {
+            str: { type: "string",  pattern: "^a{3,5}$" }
+        ,   txt: { type: "text",    pattern: "^a{3,5}$" }
+        ,   htm: { type: "html",    pattern: "^a{3,5}$" }
+        };
         var StringsPattern = mongoose.model("StringsPattern", MWS.convert(sch, mongoose));
-        delete sch.properties.str.pattern;
-        delete sch.properties.txt.pattern;
-        delete sch.properties.htm.pattern;
+        sch.properties = {
+            str: { type: "string",  minLength: 3, maxLength: 5 }
+        ,   txt: { type: "text",    minLength: 3, maxLength: 5 }
+        ,   htm: { type: "html",    minLength: 3, maxLength: 5 }
+        };
+        var StringsLength = mongoose.model("StringsLength", MWS.convert(sch, mongoose));
+        sch.properties = {
+            str: { type: "string" }
+        ,   txt: { type: "text" }
+        ,   htm: { type: "html" }
+        };
         var StringsSimple = mongoose.model("StringsSimple", MWS.convert(sch, mongoose))
         ,   good = {
                 "should accept enum 'a'":       new StringsEnum({ str: "a", txt: "a", htm: "a" })
             ,   "should accept enum 'b'":       new StringsEnum({ str: "b", txt: "b", htm: "b" })
             ,   "should accept pattern":        new StringsPattern({ str: "aaa", txt: "aaaa", htm: "aaaaa" })
+            ,   "should accept length strings": new StringsLength({ str: "aaa", txt: "aaaa", htm: "aaaaa" })
             ,   "should accept simple string":  new StringsSimple({ str: "aaa", txt: "aaaa", htm: "aaaaa" })
-            
             }
         ,   bad = {
                 "should reject enum 'c'":           new StringsEnum({ str: "c", txt: "c", htm: "c" })
             ,   "should reject non string in enum": new StringsEnum({ str: 5, txt: 5, htm: 5 })
             ,   "should reject pattern":            new StringsPattern({ str: "bbb", txt: "a", htm: "c" })
             ,   "should reject unanchored pattern": new StringsPattern({ str: "baaa", txt: "aaab", htm: "baaab" })
+            ,   "should reject short strings":      new StringsLength({ str: "aa", txt: "aa", htm: "aa" })
+            ,   "should reject long strings":       new StringsLength({ str: "aaaaaa", txt: "aaaaaa", htm: "aaaaaa" })
             ,   "should reject non simple string":  new StringsEnum({ str: 5, txt: 5, htm: 5 })
             }
         ;
@@ -184,8 +193,6 @@ describe("Converter", function () {
 //  - object with properties
 //  - array
 //      . ws.items is subdocuments
-//  - string, text, html is string
-//      . constraints
 //  - number is number
 //      . constraints
 //  - link is objectid
