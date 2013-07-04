@@ -296,6 +296,43 @@ describe("Converter", function () {
         checkBad(bad);
     });
 
+    // dates, times
+    describe("for dates and times", function () {
+        var sch = {
+                type: "object"
+            ,   properties: {
+                    name:   { type: "date" }
+                }
+            }
+        ,   DateModel = mongoose.model("DateModel", MWS.convert(sch, mongoose))
+        ;
+        sch.properties.name.type = "time";
+        var Time = mongoose.model("Time", MWS.convert(sch, mongoose));
+        sch.properties.name.type = "datetime-local";
+        var DateTimeLocal = mongoose.model("DateTimeLocal", MWS.convert(sch, mongoose))
+        ,   good = {
+                "should accept date":                       new DateModel({ name: "1977-03-15" })
+            ,   "should accept basic time":                 new Time({ name: "20:17" })
+            ,   "should accept time and seconds":           new Time({ name: "20:17:42" })
+            ,   "should accept time and milliseconds":      new Time({ name: "20:17:42.123" })
+            ,   "should accept basic datetime":             new DateTimeLocal({ name: "1977-03-15T20:17" })
+            ,   "should accept datetime and seconds":       new DateTimeLocal({ name: "1977-03-15T20:17:42" })
+            ,   "should accept datetime and milliseconds":  new DateTimeLocal({ name: "1977-03-15T20:17:42.1" })
+            }
+        ,   bad = {
+                "should reject bad string date":        new DateModel({ name: "13-07-04" })
+            ,   "should reject impossible date":        new DateModel({ name: "2013-02-32" })
+            ,   "should reject bad string time":        new Time({ name: "2:14" })
+            ,   "should reject bad string time (2)":    new Time({ name: "12:13:24.1234" })
+            ,   "should reject impossible time":        new Time({ name: "24:12" })
+            ,   "should reject bad string datetime":    new DateTimeLocal({ name: "1977-03-15T20:1" })
+            ,   "should reject impossible datetime":    new DateTimeLocal({ name: "1977-13-15T20:17" })
+            }
+        ;
+        checkGood(good);
+        checkBad(bad);
+    });
+
 });
 
 // TEST:
