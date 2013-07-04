@@ -273,11 +273,32 @@ describe("Converter", function () {
         checkBad(bad);
     });
 
+    // links
+    describe("for links", function () {
+        var sch = {
+                type: "object"
+            ,   properties: {
+                    name:   { type: "link" }
+                }
+            }
+        ,   LinkModel = mongoose.model("LinkModel", MWS.convert(sch, mongoose))
+        ,   Test = mongoose.model("Test", new mongoose.Schema({ simple: "object"}) )
+        ,   good = {
+                "should accept an object id":   new LinkModel({ name: new mongoose.Types.ObjectId })
+            ,   "should accept a model object": new LinkModel({ name: new Test() })
+            }
+        ,   bad = {
+                "should reject string": new LinkModel({ name: "foo" })
+            ,   "should reject number": new LinkModel({ name: 98 })
+            }
+        ;
+        checkGood(good);
+        checkBad(bad);
+    });
+
 });
 
 // TEST:
 //  - object with properties
-//  - array
-//      . ws.items is subdocuments
-//  - link is objectid
+//      - required
 //  - date, time, datetime-local is date
