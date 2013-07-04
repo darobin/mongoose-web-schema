@@ -243,6 +243,36 @@ describe("Converter", function () {
         checkBad(bad);
     });
 
+    // arrays
+    describe("for arrays", function () {
+        var sch = {
+                type: "object"
+            ,   properties: {
+                    name:   {
+                        type:   "array"
+                    ,   items:  {
+                            type:   "object"
+                        ,   properties: {
+                                count:  { type: "number", maximum: 10 }
+                            }
+                        }
+                    }
+                }
+            }
+        ,   ArrayModel = mongoose.model("ArrayModel", MWS.convert(sch, mongoose))
+        ,   good = {
+                "should accept an empty array":     new ArrayModel({ name: [] })
+            ,   "should accept a correct array":    new ArrayModel({ name: [{ count: 2 }, { count: 7 }] })
+            }
+        ,   bad = {
+                "should reject string":             new ArrayModel({ name: "foo" })
+            ,   "should reject incorrect array":    new ArrayModel({ name: [{ count: 42 }]})
+            }
+        ;
+        checkGood(good);
+        checkBad(bad);
+    });
+
 });
 
 // TEST:
