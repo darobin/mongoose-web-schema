@@ -218,10 +218,34 @@ describe("Converter", function () {
         checkBad(bad);
     });
 
+    // any
+    describe("for any", function () {
+        var sch = {
+                type: "object"
+            ,   properties: {
+                    name:   { type: "any" }
+                }
+            }
+        ,   AnyExplicit = mongoose.model("AnyExplicit", MWS.convert(sch, mongoose))
+        ;
+        sch.properties.name = {};
+        var AnyDefaulted = mongoose.model("AnyDefaulted", MWS.convert(sch, mongoose))
+        ,   good = {
+                "should accept any object (explicit)":  new AnyExplicit({ name: { blah: 3, foo: [{ bar: "zrub"}] } })
+            ,   "should accept any object (implicit)":  new AnyDefaulted({ name: { blah: 3, foo: [{ bar: "zrub"}] } })
+            ,   "should accept array":  new AnyExplicit({ name: []})
+            ,   "should accept string": new AnyExplicit({ name: "foo" })
+            ,   "should accept null":   new AnyExplicit({ name: null })
+            }
+        ,   bad = {}
+        ;
+        checkGood(good);
+        checkBad(bad);
+    });
+
 });
 
 // TEST:
-//  - any is mixed
 //  - object with properties
 //  - array
 //      . ws.items is subdocuments
