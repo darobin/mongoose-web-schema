@@ -333,9 +333,28 @@ describe("Converter", function () {
         checkBad(bad);
     });
 
+    // objects
+    describe("for objects", function () {
+        var sch = {
+                type: "object"
+            ,   properties: {
+                    name:    { type: "string", required: true }
+                }
+            }
+        ,   Required = mongoose.model("Required", MWS.convert(sch, mongoose))
+        ,   good = {
+                "should accept with string":    new Required({ name: "there" })
+            }
+        ,   bad = {
+                "should reject missing":    new Required({ other: "there" })
+            }
+        ;
+        checkGood(good);
+        checkBad(bad);
+    });
+
 });
 
 // TEST:
 //  - object with properties
 //      - required
-//  - date, time, datetime-local is date
