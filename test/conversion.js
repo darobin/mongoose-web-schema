@@ -354,7 +354,3 @@ describe("Converter", function () {
     });
 
 });
-
-// TEST:
-//  - object with properties
-//      - required
